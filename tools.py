@@ -88,7 +88,88 @@ Chapter content:
 
         return {"extracted text":response.candidates[0].content.parts[0].text}
     except Exception as e:
-        return{"extraction_error": str(e)}
+        return{"summary error": str(e)}
     
 
-print(summarize_text("DataStructureCH1.pdf"))
+def generate_questions(file_path:str):
+    try:
+        content=extract_text(file_path)
+        if type(content)==dict:
+            return content
+    except Exception as e:
+        return str(e)
+    prompt = f"""
+You are an expert educational content creator specializing in generating high-quality questions from textbook chapters.
+
+Task:
+Generate a set of questions based on the following chapter content.
+
+Guidelines:
+- Create 10–15 questions total
+- Use a balanced mix of question types:
+  - 3–4 factual/recall questions (who, what, when, where)
+  - 3–4 comprehension/understanding questions (explain, describe, how)
+  - 2–3 analytical/inferential questions (why, implications, relationships)
+  - 2–3 application or critical thinking questions (evaluate, compare, predict, real-world connection)
+  - 1–2 open-ended/discussion questions
+- Questions should cover the main ideas, key details, important concepts, and conclusions
+- Make questions clear, precise, and unambiguous
+- Vary difficulty from easy to more challenging
+- Do NOT provide answers — only the questions
+- Number the questions
+- Group them by type if possible (e.g. Recall Questions, Understanding Questions, etc.)
+
+Chapter content:
+{content}
+"""    
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash", 
+            contents=prompt
+        )
+        return {"Generated questions":response.candidates[0].content.parts[0].text}
+    except Exception as e:
+        return{"generate_question_error":str(e)}
+
+def extract_questions(chapter_file:str, questions_file:str):
+    try:
+        chapter = extract_text(chapter_file)
+        questions = extract_text(questions_file)
+        if type(chapter) == dict:
+            return chapter
+        elif type(questions) == dict:
+            return questions
+    except Exception as e:
+        return str(e)
+        
+    prompt = f"""
+You are an extraction assistant.
+
+Your task is to extract ONLY the questions that belong to a specific chapter.
+
+You will be given:
+- A text from the chapter
+- A text from the questions
+
+Rules:
+- Return ONLY questions related to the given chapter.
+- Do NOT rewrite or summarize questions.
+- Do NOT include questions from other chapters.
+- If no questions belong to the chapter, return that you couldn't find anything.
+- Include the question number of the question, if available
+- the question may be a choose question so include the choices as well
+
+The text from the chapter:{chapter}
+The text from the question:{questions}
+"""
+    try:
+        response= client.models.generate_content(
+            model="gemini-2.5-flash", 
+            contents=prompt
+        )
+        return {"Extracted questions": response.candidates[0].content.parts[0].text}
+    
+    except Exception as e:
+        return{"extract_question_error": str(e)}
+    
+print(extract_questions("Subnetting.pdf","NetworksQuestions.pdf"))
