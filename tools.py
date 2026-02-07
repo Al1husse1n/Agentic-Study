@@ -172,4 +172,3 @@ The text from the question:{questions}
     except Exception as e:
         return{"extract_question_error": str(e)}
     
-print(extract_questions("Subnetting.pdf","NetworksQuestions.pdf"))
