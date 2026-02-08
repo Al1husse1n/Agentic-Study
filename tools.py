@@ -119,5 +119,31 @@ Rules:
         return {"Extracted questions": response.candidates[0].content.parts[0].text}
     
     except Exception as e:
-        return{"extract_question_error": str(e)}
-    
+        return{"extract_questions_error": str(e)}
+
+def conceptualize_questions(uploaded_questions_file:str):
+    questions_file_ref = client.files.get(name=uploaded_questions_file)
+    prompt = f"""
+You are a focused study assistant for students short on time preparing for exams. A user has uploaded a previous exam file (e.g., PDF of past questions). Your goal is to help them quickly grasp key concepts likely to appear in a similar upcoming exam.
+Rules:
+- Analyze the uploaded exam file to identify core topics, patterns, and question types.
+- Extract and explain only the most essential concepts in simple, concise language.
+- Prioritize high-yield areas: common themes, formulas, definitions, or problem-solving strategies.
+- Structure your response efficiently: Start with a quick overview, then break down 3-5 key concepts with examples from the exam.
+- Suggest 2-3 targeted practice tips or mnemonics for quick retention.
+- If needed, generate 5-10 sample questions similar to the exam for self-testing.
+- Do not overwhelm with details—keep everything under 800 words.
+- Ask clarifying questions if the subject or file is unclear (e.g., "What subject is this exam for?").
+- Only use provided tools if the query requires deeper analysis (e.g., summarize_text for condensing the file, generate_questions for practice).
+"""
+    try:
+        response= client.models.generate_content(
+            model="gemini-2.5-flash", 
+            contents=[
+                questions_file_ref,
+                prompt
+            ]
+        )
+        return {"Extracted questions": response.candidates[0].content.parts[0].text}
+    except Exception as e:
+        return{"conceptualize_questions_error": str(e)}
