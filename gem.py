@@ -24,9 +24,9 @@ function_declaration=[
         parameters={
             "type":"object",
             "properties":{
-                "file_path":{"type":"string"}
+                "uploaded_file":{"type":"string"}
             },
-            "required":["file_path"]
+            "required":["uploaded_file"]
         }
     ),
     types.FunctionDeclaration(
@@ -35,21 +35,21 @@ function_declaration=[
         parameters={
             "type":"object",
             "properties":{
-                "file_path":{"type":"string"}
+                "uploaded_file":{"type":"string"}
             },
-            "required":["file_path"]
+            "required":["uploaded_file"]
         }
     ),
     types.FunctionDeclaration(
         name="extract_questions",
-        description="extract ONLY the questions that belong to the specific chapter provided from the questions provided.",
+        description="extract ONLY the questions that belong to the specific chapter provided from the questions provided",
         parameters={
             "type":"object",
             "properties":{
-                "chapter_file":{"type":"string"},
-                "questions_file":{"type":"string"}
+                "uploaded_chapter_file":{"type":"string"},
+                "uploaded_questions_file":{"type":"string"}
             },
-            "required":["chapter_file","questions_file"]
+            "required":["uploaded_chapter_file","uploaded_questions_file"]
         }
     )
 ]
@@ -60,14 +60,17 @@ tool = types.Tool(function_declarations=function_declaration)
 
 
 #Agent loop
-def study_agent(user_prompt):
+def study_agent(user_prompt, chapter_file, questions_file):
     tools_called=[]
+    files_info = ""
+    if chapter_file:
+        files_info += f"\n[Chapter file uploaded with ID: {chapter_file}]"
+    if questions_file:
+        files_info += f"\n[Questions file uploaded with ID: {questions_file}]"
     history= [
         types.Content(
             role="user",
-            parts=[
-                types.Part.from_text(text=user_prompt)
-            ]
+            parts=[types.Part.from_text(text=user_prompt+files_info)]
         )
     ]
 
@@ -82,9 +85,9 @@ def study_agent(user_prompt):
     - Do not invent information or assume missing details.
     - If a tool is required but one or more arguments are missing, ask the student to provide them.
     - Do not fill in missing tool arguments yourself.
-    - Call at most one tool per turn.
-    - The user may provide the chapter file or may give nothing/empty string
-    - The user may provide the question file or may give nothing/empty string
+    - The user may provide the chapter file or may give nothing
+    - The user may provide the question file or may give nothing
+    - if the user asks you something general, like helping them to study the chapter, call all the tools depending on the context/files are given
     """
 
     system_inst = types.Content(
@@ -119,7 +122,6 @@ def study_agent(user_prompt):
             print(final_text)
             return{"final_answer": final_text, "tools_called":tools_called}
             break
-
         for fc in function_calls:
             func_name = fc.name
             args = dict(fc.args)
