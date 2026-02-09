@@ -13,7 +13,8 @@ client=genai.Client(api_key=GEMINI_API_KEY)
 tools_map={
     "summarize_text":summarize_text,
     "generate_questions":generate_questions,
-    "extract_questions":extract_questions
+    "extract_questions":extract_questions,
+    "conceptualize_questions":conceptualize_questions
 }
 
 #function declarations
@@ -50,6 +51,17 @@ function_declaration=[
                 "uploaded_questions_file":{"type":"string"}
             },
             "required":["uploaded_chapter_file","uploaded_questions_file"]
+        }
+    ),
+    types.FunctionDeclaration(
+        name="conceptualize_questions",
+        description="explain concepts based on provided questions",
+        parameters={
+            "type":"object",
+            "properties":{
+                "uploaded_questions_file":{"type":"string"}
+            },
+            "required":["uploaded_questions_file"]
         }
     )
 ]
