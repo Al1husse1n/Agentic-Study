@@ -1,5 +1,10 @@
-pip install --upgrade google-genai
-pip install python-magic
-# On Windows you may also need: pip install python-magic-bin
- pip install python-docx 
- pip install pymupdf
+fastapi
+uvicorn
+pydantic
+python-dotenv
+google-generativeai
+google-genai
+python-magic
+pymupdf
+python-docx
+sqlalchemy
