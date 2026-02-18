@@ -95,22 +95,47 @@ cp .env.example .env
 # 5. Run the server
 uvicorn main:app --reload
 
- Main EndpointPOST /responseForm-data fields:Field
-Type
-Required
-Description
-prompt
-string
-Yes
-User instruction / question
-chapter_file
-file
-Optional
-PDF or DOCX of the chapter
-questions_file
-file
-Optional
-PDF or DOCX containing past questions
+# API Endpoints – AI Study Assistant
+
+All endpoints are served under the FastAPI application.
+
+Base URL (local development):  
+`http://127.0.0.1:8000`
+
+Interactive documentation (Swagger UI):  
+`http://127.0.0.1:8000/docs`  
+(ReDoc alternative: `/redoc`)
+
+## Main Endpoint
+
+### `POST /response`
+
+**Description**  
+The primary endpoint that accepts a user prompt and optional files.  
+The agentic system processes the request using reasoning, tool selection, and Google Gemini.
+
+**Content-Type**: `multipart/form-data`
+
+**Form fields** (all sent as form data):
+
+| Field            | Type     | Required | Description                                                                 |
+|------------------|----------|----------|-----------------------------------------------------------------------------|
+| `prompt`         | string   | **Yes**  | The user's instruction or question (e.g. "Summarize this chapter", "Generate 20 questions") |
+| `chapter_file`   | file     | Optional | PDF or DOCX file containing the chapter content                             |
+| `questions_file` | file     | Optional | PDF or DOCX file containing past exam questions or question bank            |
+
+**Supported file types**  
+- PDF  
+- DOCX  
+
+**Example requests** (using curl or Postman)
+
+```bash
+# 1. Summarize a chapter
+curl -X POST "http://127.0.0.1:8000/response" \
+  -F "prompt=Summarize this chapter in detail" \
+  -F "chapter_file=@path/to/chapter3.pdf"
+
 
 Example prompts"Summarize this chapter"
 "Generate 20 high-quality exam questions"
